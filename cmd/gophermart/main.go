@@ -6,6 +6,7 @@ import (
 
 	"github.com/evildead81/gophermart/internal/config"
 	"github.com/evildead81/gophermart/internal/handlers"
+	"github.com/evildead81/gophermart/internal/middlewares"
 	dbstorage "github.com/evildead81/gophermart/internal/storages/db-storage"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -32,15 +33,18 @@ func main() {
 		r.Route("/user", func(r chi.Router) {
 			r.Post("/register", handlers.Register(storage))
 			r.Post("/login", handlers.Login(storage))
-			r.Route("/orders", func(r chi.Router) {
-				r.Get("/", handlers.GetOrders(storage))
-				r.Post("/{number}", handlers.CreateOrder(storage))
+			r.Group(func(r chi.Router) {
+				r.Use(middlewares.AuthMiddleware)
+				r.Route("/orders", func(r chi.Router) {
+					r.Get("/", handlers.GetOrders(storage))
+					r.Post("/{number}", handlers.CreateOrder(storage))
+				})
+				r.Route("/balance", func(r chi.Router) {
+					r.Get("/", handlers.GetBalance(storage))
+					r.Post("/withdraw", handlers.Withdraw(storage))
+				})
+				r.Get("/withdrawals", handlers.GetWithdrawals(storage))
 			})
-			r.Route("/balance", func(r chi.Router) {
-				r.Get("/", handlers.GetBalance(storage))
-				r.Post("/withdraw", handlers.Withdraw(storage))
-			})
-			r.Get("/withdrawals", handlers.GetWithdrawals(storage))
 		})
 	})
 
