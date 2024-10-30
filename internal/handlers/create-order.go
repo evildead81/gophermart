@@ -48,6 +48,5 @@ func CreateOrder(storage storages.Storage) http.HandlerFunc {
 		}
 
 		rw.WriteHeader(http.StatusOK)
-
 	}
 }
