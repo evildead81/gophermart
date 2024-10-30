@@ -12,4 +12,5 @@ type Storage interface {
 	GetUserBalance(userID int) (contracts.Balance, error)
 	Withdraw(userID int, order string, sum float64) error
 	GetUserWithdrawals(userID int) ([]contracts.Withdrawal, error)
+	ProcessAccruals(accrualAddress string)
 }

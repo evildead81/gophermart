@@ -2,7 +2,9 @@ package dbstorage
 
 import (
 	"database/sql"
+	"log"
 
+	"github.com/evildead81/gophermart/internal/accrual"
 	"github.com/evildead81/gophermart/internal/contracts"
 	"github.com/evildead81/gophermart/internal/errors"
 	"github.com/evildead81/gophermart/internal/hashing"
@@ -230,4 +232,68 @@ func (s *DBStorage) GetUserWithdrawals(userID int) ([]contracts.Withdrawal, erro
 	}
 
 	return withdrawals, nil
+}
+
+func (s *DBStorage) ProcessAccruals(accrualAddress string) {
+	rows, err := s.db.Query("SELECT order_id, order_number, user_id FROM orders WHERE status IN ('NEW', 'PROCESSING')")
+	if err != nil {
+		log.Printf("Error fetching orders: %v", err)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var orderID int
+		var orderNumber string
+		var userID int
+
+		if err := rows.Scan(&orderID, &orderNumber, &userID); err != nil {
+			log.Printf("Error scanning order: %v", err)
+			continue
+		}
+
+		accrualResp, err := accrual.GetAccrualStatus(orderNumber, accrualAddress)
+		if err != nil {
+			log.Printf("Error getting accrual status: %v", err)
+			continue
+		}
+
+		switch accrualResp.Status {
+		case "PROCESSED":
+			_, err := s.db.Exec(
+				"UPDATE orders SET status = $1, accrual = $2, processed_at = NOW() WHERE order_id = $3",
+				accrualResp.Status, accrualResp.Accrual, orderID,
+			)
+			if err != nil {
+				log.Printf("Error updating order status: %v", err)
+				continue
+			}
+
+			_, err = s.db.Exec(
+				"UPDATE balances SET current_balance = current_balance + $1, last_updated = NOW() WHERE user_id = $2",
+				accrualResp.Accrual, userID,
+			)
+			if err != nil {
+				log.Printf("Error updating balance: %v", err)
+			}
+
+		case "INVALID":
+			_, err := s.db.Exec(
+				"UPDATE orders SET status = $1, processed_at = NOW() WHERE order_id = $2",
+				accrualResp.Status, orderID,
+			)
+			if err != nil {
+				log.Printf("Error updating invalid order status: %v", err)
+			}
+
+		case "PROCESSING", "REGISTERED":
+			_, err := s.db.Exec(
+				"UPDATE orders SET status = $1 WHERE order_id = $2",
+				accrualResp.Status, orderID,
+			)
+			if err != nil {
+				log.Printf("Error updating processing order status: %v", err)
+			}
+		}
+	}
 }

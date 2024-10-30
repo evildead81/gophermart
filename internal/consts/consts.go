@@ -1,4 +1,4 @@
 package consts
 
-var CookieName = "AuthToken"
-var UserIDKey = "userID"
+const CookieName = "AuthToken"
+const UserIDKey = "userID"
