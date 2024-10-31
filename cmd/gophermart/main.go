@@ -3,15 +3,29 @@ package main
 import (
 	"database/sql"
 	"net/http"
+	"time"
 
 	"github.com/evildead81/gophermart/internal/config"
 	"github.com/evildead81/gophermart/internal/handlers"
 	"github.com/evildead81/gophermart/internal/middlewares"
+	"github.com/evildead81/gophermart/internal/storages"
 	dbstorage "github.com/evildead81/gophermart/internal/storages/db-storage"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
+
+func startAccrualProcessing(storage storages.Storage, accrualSystemAddress string, interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			storage.ProcessAccruals(accrualSystemAddress)
+		}
+	}
+}
 
 func main() {
 	config, err := config.GetServerConfig()
@@ -47,6 +61,8 @@ func main() {
 			})
 		})
 	})
+
+	go startAccrualProcessing(storage, config.AccrualSystemAddress, 5*time.Minute)
 
 	srv := &http.Server{
 		Addr:    config.RunAddress,
