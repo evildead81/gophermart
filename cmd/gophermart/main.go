@@ -19,11 +19,8 @@ func startAccrualProcessing(storage storages.Storage, accrualSystemAddress strin
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
-	for {
-		select {
-		case <-ticker.C:
-			storage.ProcessAccruals(accrualSystemAddress)
-		}
+	for range ticker.C {
+		storage.ProcessAccruals(accrualSystemAddress)
 	}
 }
 
