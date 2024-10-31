@@ -19,7 +19,7 @@ func Login(storage storages.Storage) http.HandlerFunc {
 		}
 
 		err := storage.CheckUserCredentials(request.Login, request.Password)
-		if err == errors.InvalidCredentials {
+		if err == errors.ErrInvalidCredentials {
 			http.Error(rw, "Invalid login or password", http.StatusUnauthorized)
 			return
 		} else if err != nil {
@@ -27,7 +27,7 @@ func Login(storage storages.Storage) http.HandlerFunc {
 			return
 		}
 
-		userID, err := storage.GetUserIdByLogin(request.Login)
+		userID, err := storage.GetUserIDByLogin(request.Login)
 		if err != nil {
 			http.Error(rw, "Internal server error", http.StatusInternalServerError)
 			return

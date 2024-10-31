@@ -73,13 +73,13 @@ func (s *DBStorage) CheckUserCredentials(login string, password string) error {
 	err := s.db.QueryRow("SELECT password_hash FROM users WHERE login = $1", login).Scan(&storedHash)
 
 	if err == sql.ErrNoRows {
-		return errors.InvalidCredentials
+		return errors.ErrInvalidCredentials
 	} else if err != nil {
 		return err
 	}
 
 	if !hashing.CheckPasswordHash(password, storedHash) {
-		return errors.InvalidCredentials
+		return errors.ErrInvalidCredentials
 	}
 
 	return nil
@@ -93,7 +93,7 @@ func (s *DBStorage) RegisterUser(login string, password string) error {
 	}
 
 	if userExists {
-		return errors.UserIsAlreadyExists
+		return errors.ErrUserIsAlreadyExists
 	}
 
 	hashedPassword, err := hashing.HashPassword(password)
@@ -109,7 +109,7 @@ func (s *DBStorage) RegisterUser(login string, password string) error {
 	return nil
 }
 
-func (s *DBStorage) GetUserIdByLogin(login string) (int64, error) {
+func (s *DBStorage) GetUserIDByLogin(login string) (int64, error) {
 	var userID int
 	err := s.db.QueryRow("SELECT user_id FROM users WHERE login = $1", login).Scan(&userID)
 	if err != nil {
@@ -119,7 +119,7 @@ func (s *DBStorage) GetUserIdByLogin(login string) (int64, error) {
 	return int64(userID), nil
 }
 
-func (s *DBStorage) GetUserIdByOrderNumber(orderNumber string) (int64, error) {
+func (s *DBStorage) GetUserIDByOrderNumber(orderNumber string) (int64, error) {
 	var userID int
 	err := s.db.QueryRow("SELECT user_id FROM orders WHERE order_number = $1", orderNumber).Scan(&userID)
 	if err != nil {
@@ -167,7 +167,7 @@ func (s *DBStorage) GetUserBalance(userID int) (contracts.Balance, error) {
 	var balance contracts.Balance
 	err := s.db.QueryRow("SELECT current_balance, total_withdrawn FROM balances WHERE user_id = $1", userID).Scan(&balance.CurrentBalance, &balance.TotalWithdrawn)
 	if err == sql.ErrNoRows {
-		return contracts.Balance{}, errors.NotFound
+		return contracts.Balance{}, errors.ErrNotFound
 	} else if err != nil {
 		return contracts.Balance{}, err
 	}
@@ -179,7 +179,7 @@ func (s *DBStorage) Withdraw(userID int, order string, sum float64) error {
 	var currentBalance float64
 	err := s.db.QueryRow("SELECT current_balance FROM balances WHERE user_id = $1", userID).Scan(&currentBalance)
 	if err == sql.ErrNoRows || currentBalance < sum {
-		return errors.PaymentRequiredError
+		return errors.ErrPaymentRequiredError
 	} else if err != nil {
 		return err
 	}

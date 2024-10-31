@@ -21,7 +21,7 @@ func Withdraw(storage storages.Storage) http.HandlerFunc {
 		}
 
 		err := storage.Withdraw(userID, request.Order, request.Sum)
-		if err == errors.PaymentRequiredError {
+		if err == errors.ErrPaymentRequiredError {
 			http.Error(rw, "Insufficient funds", http.StatusPaymentRequired)
 			return
 		} else if err != nil {

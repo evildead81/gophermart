@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 
 	"github.com/evildead81/gophermart/internal/config"
@@ -17,13 +16,11 @@ import (
 func main() {
 	config, err := config.GetServerConfig()
 	if err != nil {
-		log.Printf(err.Error())
 		panic(err)
 	}
 
 	db, err := sql.Open("pgx", config.DBUri)
 	if err != nil {
-		log.Printf(err.Error())
 		panic(err)
 	}
 	defer db.Close()

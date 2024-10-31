@@ -2,4 +2,4 @@ package errors
 
 import "errors"
 
-var NotFound = errors.New("Not found")
+var ErrNotFound = errors.New("not found")

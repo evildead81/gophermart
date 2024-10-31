@@ -13,7 +13,7 @@ func GetBalance(storage storages.Storage) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		userID := r.Context().Value(consts.UserIDKey).(int)
 		balance, err := storage.GetUserBalance(userID)
-		if err == errors.NotFound {
+		if err == errors.ErrNotFound {
 			http.Error(rw, "Balance not found", http.StatusNotFound)
 			return
 		} else if err != nil {

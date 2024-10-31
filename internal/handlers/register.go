@@ -20,7 +20,7 @@ func Register(storage storages.Storage) http.HandlerFunc {
 
 		err := storage.RegisterUser(request.Login, request.Password)
 
-		if err == errors.UserIsAlreadyExists {
+		if err == errors.ErrUserIsAlreadyExists {
 			http.Error(rw, "Login is already taken", http.StatusConflict)
 			return
 		}
@@ -30,7 +30,7 @@ func Register(storage storages.Storage) http.HandlerFunc {
 			return
 		}
 
-		userID, err := storage.GetUserIdByLogin(request.Login)
+		userID, err := storage.GetUserIDByLogin(request.Login)
 		if err != nil {
 			http.Error(rw, "Internal server error", http.StatusInternalServerError)
 			return

@@ -2,5 +2,5 @@ package errors
 
 import "errors"
 
-var InvalidCredentials = errors.New("Invalid login or password")
-var UserIsAlreadyExists = errors.New("Login already taken")
+var ErrInvalidCredentials = errors.New("invalid login or password")
+var ErrUserIsAlreadyExists = errors.New("login already taken")

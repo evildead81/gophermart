@@ -25,7 +25,7 @@ func CreateOrder(storage storages.Storage) http.HandlerFunc {
 			return
 		}
 
-		existUserID, err := storage.GetUserIdByOrderNumber(orderNumber)
+		existUserID, err := storage.GetUserIDByOrderNumber(orderNumber)
 		if err != nil && err != sql.ErrNoRows {
 			http.Error(rw, "Server error", http.StatusInternalServerError)
 			return
