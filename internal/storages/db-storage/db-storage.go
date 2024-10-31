@@ -152,12 +152,11 @@ func (s *DBStorage) GetUserOrders(userID int) ([]contracts.Order, error) {
 			return nil, err
 		}
 
-		orders = append(orders, contracts.Order{
-			OrderNumber: order.OrderNumber,
-			Status:      order.Status,
-			Accrual:     order.Accrual,
-			UploadedAt:  order.UploadedAt,
-		})
+		orders = append(orders, order)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return orders, nil
@@ -231,6 +230,10 @@ func (s *DBStorage) GetUserWithdrawals(userID int) ([]contracts.Withdrawal, erro
 		})
 	}
 
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return withdrawals, nil
 }
 
@@ -295,5 +298,9 @@ func (s *DBStorage) ProcessAccruals(accrualAddress string) {
 				log.Printf("Error updating processing order status: %v", err)
 			}
 		}
+	}
+
+	if err := rows.Err(); err != nil {
+		return
 	}
 }

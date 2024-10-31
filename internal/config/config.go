@@ -14,9 +14,9 @@ type ServerConfig struct {
 }
 
 func GetServerConfig() (*ServerConfig, error) {
-	var endppointParam = flag.String("a", "localhost:6009", "Server endpoint")
+	var endppointParam = flag.String("a", "localhost:8080", "Server endpoint")
 	var dbURIParam = flag.String("d", "", "DB connection string")
-	var accrualSystemAddressParam = flag.String("r", "localhost:9006", "Accrual system address")
+	var accrualSystemAddressParam = flag.String("r", "localhost:8081", "Accrual system address")
 	flag.Parse()
 	var cfg ServerConfig
 	err := env.Parse(&cfg)

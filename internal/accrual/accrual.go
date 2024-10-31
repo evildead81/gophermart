@@ -17,7 +17,7 @@ func GetAccrualStatus(orderNumber string, accrualSystemAddress string) (*contrac
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Accrual service returned status: %v", resp.StatusCode)
+		return nil, fmt.Errorf("accrual service returned status: %v", resp.StatusCode)
 	}
 
 	var accrualResp contracts.AccrualResponse
