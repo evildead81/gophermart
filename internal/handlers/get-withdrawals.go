@@ -20,7 +20,7 @@ func GetWithdrawals(storage storages.Storage) http.HandlerFunc {
 		}
 
 		json.NewEncoder(rw).Encode(withdrawals)
-		r.Header.Set("Content-Type", "application/json; charset=utf-8")
+		rw.Header().Add("Content-type", "application/json")
 		rw.WriteHeader(http.StatusOK)
 	}
 }
