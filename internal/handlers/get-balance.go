@@ -22,6 +22,7 @@ func GetBalance(storage storages.Storage) http.HandlerFunc {
 		}
 
 		json.NewEncoder(rw).Encode(balance)
+		r.Header.Set("Content-Type", "application/json; charset=utf-8")
 		rw.WriteHeader(http.StatusOK)
 	}
 }

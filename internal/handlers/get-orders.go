@@ -24,6 +24,7 @@ func GetOrders(storage storages.Storage) http.HandlerFunc {
 		}
 
 		json.NewEncoder(rw).Encode(orders)
+		r.Header.Set("Content-Type", "application/json; charset=utf-8")
 		rw.WriteHeader(http.StatusOK)
 	}
 }

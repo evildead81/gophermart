@@ -3,7 +3,6 @@ package handlers
 import (
 	"database/sql"
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/evildead81/gophermart/internal/consts"
@@ -17,12 +16,11 @@ func CreateOrder(storage storages.Storage) http.HandlerFunc {
 
 		orderNumber, err := io.ReadAll(r.Body)
 		if err != nil {
-			log.Printf("Error reading body: %v", err)
 			http.Error(rw, "Invalid request format", http.StatusBadRequest)
 			return
 		}
 
-		if helpers.IsValidLuhn(string(orderNumber)) {
+		if !helpers.IsValidLuhn(string(orderNumber)) {
 			http.Error(rw, "Invalid order number format", http.StatusUnprocessableEntity)
 			return
 		}
