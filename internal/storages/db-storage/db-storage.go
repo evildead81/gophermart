@@ -161,13 +161,13 @@ func (s *DBStorage) CreateOrder(userID int, orderNumber string) error {
 
 func (s *DBStorage) GetUserOrders(userID int) ([]contracts.Order, error) {
 	rows, err := s.db.Query("SELECT order_number, status, accrual, uploaded_at FROM orders WHERE user_id = $1 ORDER BY uploaded_at DESC", userID)
-	if err == sql.ErrNoRows {
-		return make([]contracts.Order, 0), nil
-	}
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
 	defer rows.Close()
+	if err == sql.ErrNoRows {
+		return make([]contracts.Order, 0), nil
+	}
 
 	var orders []contracts.Order
 	for rows.Next() {
