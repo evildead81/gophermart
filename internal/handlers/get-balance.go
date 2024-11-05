@@ -1,0 +1,30 @@
+package handlers
+
+import (
+	"encoding/json"
+	"net/http"
+
+	"github.com/evildead81/gophermart/internal/consts"
+	"github.com/evildead81/gophermart/internal/storages"
+)
+
+func GetBalance(storage storages.Storage) http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		userID := r.Context().Value(consts.UserIDKey).(int)
+		balance, err := storage.GetUserBalance(userID)
+		if err != nil {
+			http.Error(rw, "Server error", http.StatusInternalServerError)
+			return
+		}
+
+		bytes, err := json.MarshalIndent(balance, "", "   ")
+		if err != nil {
+			http.Error(rw, "Server error", http.StatusInternalServerError)
+			return
+		}
+
+		rw.Header().Add("Content-type", "application/json")
+		rw.WriteHeader(http.StatusOK)
+		rw.Write(bytes)
+	}
+}
