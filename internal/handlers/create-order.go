@@ -37,7 +37,7 @@ func CreateOrder(storage storages.Storage) http.HandlerFunc {
 		}
 
 		if existUserID == int64(userID) {
-			rw.WriteHeader(http.StatusAccepted)
+			rw.WriteHeader(http.StatusOK)
 			return
 		}
 
@@ -47,6 +47,6 @@ func CreateOrder(storage storages.Storage) http.HandlerFunc {
 			return
 		}
 
-		rw.WriteHeader(http.StatusOK)
+		rw.WriteHeader(http.StatusAccepted)
 	}
 }

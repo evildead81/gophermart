@@ -23,8 +23,14 @@ func GetOrders(storage storages.Storage) http.HandlerFunc {
 			return
 		}
 
-		json.NewEncoder(rw).Encode(orders)
+		bytes, err := json.MarshalIndent(orders, "", "   ")
+		if err != nil {
+			http.Error(rw, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
 		rw.Header().Add("Content-type", "application/json")
 		rw.WriteHeader(http.StatusOK)
+		rw.Write(bytes)
 	}
 }

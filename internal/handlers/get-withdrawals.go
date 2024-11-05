@@ -19,8 +19,14 @@ func GetWithdrawals(storage storages.Storage) http.HandlerFunc {
 			return
 		}
 
-		json.NewEncoder(rw).Encode(withdrawals)
+		bytes, err := json.MarshalIndent(withdrawals, "", "   ")
+		if err != nil {
+			http.Error(rw, "Server error", http.StatusInternalServerError)
+			return
+		}
+
 		rw.Header().Add("Content-type", "application/json")
 		rw.WriteHeader(http.StatusOK)
+		rw.Write(bytes)
 	}
 }

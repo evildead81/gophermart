@@ -21,8 +21,14 @@ func GetBalance(storage storages.Storage) http.HandlerFunc {
 			return
 		}
 
-		json.NewEncoder(rw).Encode(balance)
+		bytes, err := json.MarshalIndent(balance, "", "   ")
+		if err != nil {
+			http.Error(rw, "Server error", http.StatusInternalServerError)
+			return
+		}
+
 		rw.Header().Add("Content-type", "application/json")
 		rw.WriteHeader(http.StatusOK)
+		rw.Write(bytes)
 	}
 }
