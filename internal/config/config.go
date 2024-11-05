@@ -3,17 +3,19 @@ package config
 import (
 	"errors"
 	"flag"
+	"fmt"
 
 	"github.com/caarlos0/env/v6"
 )
 
 type ServerConfig struct {
 	RunAddress           string `env:"RUN_ADDRESS"`
-	DBUri                string `env:"DB_URI"`
+	DBUri                string `env:"DATABASE_URI"`
 	AccrualSystemAddress string `env:"ACCRUAL_SYSTEM_ADDRESS"`
 }
 
 func GetServerConfig() (*ServerConfig, error) {
+	fmt.Println("GET_SERVER_CONFIG")
 	var endppointParam = flag.String("a", "localhost:8080", "Server endpoint")
 	var dbURIParam = flag.String("d", "", "DB connection string")
 	var accrualSystemAddressParam = flag.String("r", "localhost:8081", "Accrual system address")
@@ -22,6 +24,7 @@ func GetServerConfig() (*ServerConfig, error) {
 	err := env.Parse(&cfg)
 
 	if err != nil {
+		fmt.Println("GET_SERVER_CONFIG")
 		return nil, err
 	}
 
