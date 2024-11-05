@@ -96,12 +96,33 @@ func (s *DBStorage) RegisterUser(login string, password string) error {
 		return errors.ErrUserIsAlreadyExists
 	}
 
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
 	hashedPassword, err := hashing.HashPassword(password)
 	if err != nil {
 		return err
 	}
 
-	_, err = s.db.Exec("INSERT INTO users (login, password_hash) VALUES ($1, $2)", login, hashedPassword)
+	var userID int
+	err = tx.QueryRow("INSERT INTO users (login, password_hash) VALUES ($1, $2) RETURNING user_id", login, hashedPassword).Scan(&userID)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec("INSERT INTO balances (user_id, current_balance, total_withdrawn) VALUES ($1, 0, 0)", userID)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit()
 	if err != nil {
 		return err
 	}
@@ -165,9 +186,7 @@ func (s *DBStorage) GetUserOrders(userID int) ([]contracts.Order, error) {
 func (s *DBStorage) GetUserBalance(userID int) (contracts.Balance, error) {
 	var balance contracts.Balance
 	err := s.db.QueryRow("SELECT current_balance, total_withdrawn FROM balances WHERE user_id = $1", userID).Scan(&balance.CurrentBalance, &balance.TotalWithdrawn)
-	if err == sql.ErrNoRows {
-		return contracts.Balance{}, errors.ErrNotFound
-	} else if err != nil {
+	if err != nil {
 		return contracts.Balance{}, err
 	}
 
