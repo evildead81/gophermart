@@ -2,7 +2,8 @@ package handlers
 
 import (
 	"database/sql"
-	"encoding/json"
+	"io"
+	"log"
 	"net/http"
 
 	"github.com/evildead81/gophermart/internal/consts"
@@ -14,18 +15,19 @@ func CreateOrder(storage storages.Storage) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		userID := r.Context().Value(consts.UserIDKey).(int)
 
-		var orderNumber string
-		if err := json.NewDecoder(r.Body).Decode(&orderNumber); err != nil {
-			http.Error(rw, "Invalid order number format", http.StatusBadRequest)
+		orderNumber, err := io.ReadAll(r.Body)
+		if err != nil {
+			log.Printf("Error reading body: %v", err)
+			http.Error(rw, "Invalid request format", http.StatusBadRequest)
 			return
 		}
 
-		if helpers.IsValidLuhn(orderNumber) {
+		if helpers.IsValidLuhn(string(orderNumber)) {
 			http.Error(rw, "Invalid order number format", http.StatusUnprocessableEntity)
 			return
 		}
 
-		existUserID, err := storage.GetUserIDByOrderNumber(orderNumber)
+		existUserID, err := storage.GetUserIDByOrderNumber(string(orderNumber))
 		if err != nil && err != sql.ErrNoRows {
 			http.Error(rw, "Server error", http.StatusInternalServerError)
 			return
@@ -41,7 +43,7 @@ func CreateOrder(storage storages.Storage) http.HandlerFunc {
 			return
 		}
 
-		err = storage.CreateOrder(userID, orderNumber)
+		err = storage.CreateOrder(userID, string(orderNumber))
 		if err != nil {
 			http.Error(rw, "Server error", http.StatusInternalServerError)
 			return
