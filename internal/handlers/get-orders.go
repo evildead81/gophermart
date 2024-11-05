@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/evildead81/gophermart/internal/consts"
@@ -14,6 +15,7 @@ func GetOrders(storage storages.Storage) http.HandlerFunc {
 
 		orders, err := storage.GetUserOrders(userID)
 		if err != nil {
+			log.Println(err.Error())
 			http.Error(rw, "Internal server error", http.StatusInternalServerError)
 			return
 		}
