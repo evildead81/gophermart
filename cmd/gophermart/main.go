@@ -48,7 +48,7 @@ func main() {
 				r.Use(middlewares.AuthMiddleware)
 				r.Route("/orders", func(r chi.Router) {
 					r.Get("/", handlers.GetOrders(storage))
-					r.Post("/{number}", handlers.CreateOrder(storage))
+					r.Post("/", handlers.CreateOrder(storage))
 				})
 				r.Route("/balance", func(r chi.Router) {
 					r.Get("/", handlers.GetBalance(storage))
