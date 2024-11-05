@@ -18,6 +18,8 @@ func GetOrders(storage storages.Storage) http.HandlerFunc {
 			return
 		}
 
+		rw.Header().Add("Content-type", "application/json")
+
 		if len(orders) == 0 {
 			rw.WriteHeader(http.StatusNoContent)
 			return
@@ -29,7 +31,6 @@ func GetOrders(storage storages.Storage) http.HandlerFunc {
 			return
 		}
 
-		rw.Header().Add("Content-type", "application/json")
 		rw.WriteHeader(http.StatusOK)
 		rw.Write(bytes)
 	}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"net/http"
 	"time"
@@ -15,12 +16,22 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-func startAccrualProcessing(storage storages.Storage, accrualSystemAddress string, interval time.Duration) {
+func startAccrualProcessing(ctx context.Context, storage storages.Storage, accrualSystemAddress string, interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
 	for range ticker.C {
 		storage.ProcessAccruals(accrualSystemAddress)
+	}
+
+	for {
+		select {
+		case <-ticker.C:
+			storage.ProcessAccruals(accrualSystemAddress)
+		case <-ctx.Done():
+			return
+		}
+
 	}
 }
 
@@ -59,7 +70,10 @@ func main() {
 		})
 	})
 
-	go startAccrualProcessing(storage, config.AccrualSystemAddress, 5*time.Minute)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go startAccrualProcessing(ctx, storage, config.AccrualSystemAddress, 5*time.Minute)
 
 	srv := &http.Server{
 		Addr:    config.RunAddress,
