@@ -73,7 +73,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go startAccrualProcessing(ctx, storage, config.AccrualSystemAddress, 1*time.Minute)
+	go startAccrualProcessing(ctx, storage, config.AccrualSystemAddress, 15*time.Second)
 
 	srv := &http.Server{
 		Addr:    config.RunAddress,
